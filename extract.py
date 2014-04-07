@@ -7,11 +7,13 @@ import sys
 def parse_timelog(filename):
     d = {}
 
+    typ = namedtuple('TimelogEntry', 'script stage timestamp')
+
     parsed = []
     for line in open(filename):
         script, stage, tstamp = line.strip().split(' ', 2)
         tstamp = datetime.datetime.strptime(tstamp, '%a %b %d %H:%M:%S %Z %Y')
-        parsed.append((script, stage, tstamp))
+        parsed.append(typ(script, stage, tstamp))
 
     return d, parsed
 
@@ -66,7 +68,7 @@ def parse_sartime(t):
 
 def get_sar_start_time(sar_data, timelog_data):
     sar_time = sar_data[0][0]
-    timelog_time = timelog_data[0][2]
+    timelog_time = timelog_data[0].timestamp
 
     hour, minute, second = parse_sartime(sar_time)
 
@@ -80,6 +82,7 @@ def get_sar_start_time(sar_data, timelog_data):
     return d2
 
 def make_timediff(sar_data):
+    "Calculate sampling frequency in seconds. Must be less than 1 hr."
     t1 = parse_sartime(sar_data[0][0])
     t2 = parse_sartime(sar_data[1][0])
 
@@ -89,6 +92,7 @@ def make_timediff(sar_data):
     return secdiff
 
 def fixtime(sar_data, start, secdiff):
+    "Fix the hh::mm::ss timestamps output by 'sar' to full datetimes."
     delta = datetime.timedelta(0, secdiff)
 
     currentime = start 
@@ -101,6 +105,7 @@ def fixtime(sar_data, start, secdiff):
     return sar_data2
 
 def make_time(x, start=None):
+    "Convert datetimes into seconds with time.mktime, optionally - start."
     sub = 0
     if start:
         sub = time.mktime(start.timetuple())
