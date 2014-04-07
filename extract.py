@@ -3,6 +3,7 @@ import datetime
 from collections import namedtuple
 import time
 import sys
+import gzip
 
 def parse_timelog(filename):
     d = {}
@@ -22,7 +23,7 @@ def parse_sar_cpu(filename):
 
     #09:40:03 PM     CPU     %user     %nice   %system   %iowait    %steal     %idle
     typ = namedtuple('CPUUsage', 'time cpu puser pnice psystem piowait psteal pidle')
-    for n, line in enumerate(open(filename)):
+    for n, line in enumerate(gzip.open(filename)):
         if n < 3:
             continue
         if line.startswith('Average'):
@@ -43,18 +44,18 @@ def parse_sar_ram(filename):
     parsed = []
 
     # 09:40:03 PM kbmemfree kbmemused  %memused kbbuffers  kbcached  kbcommit   %commit kbactive   kbinact   kbdirty
-    typ = namedtuple('MemoryUsage', 'time kbmemfree kbmemused pmemused kbbuffers kbcached kbcommit pcommit kbactive kbinact kbdirty')
+    typ = namedtuple('MemoryUsage', 'time kbmemfree kbmemused pmemused kbbuffers kbcached kbcommit pcommit kbactive kbinact')
     
-    for n, line in enumerate(open(filename)):
+    for n, line in enumerate(gzip.open(filename)):
         if n < 3:
             continue
         if line.startswith('Average'):
             continue
 
         line = line.strip().split()
-        assert len(line) == 12, len(line)
+        assert len(line) >= 11, len(line)
         line2 = [line[0] + ' ' + line[1]]
-        line2.extend(( float(x) for x in line[2:]))
+        line2.extend(( float(x) for x in line[2:11]))
 
         t = typ(*line2)
         parsed.append(t)
@@ -115,30 +116,26 @@ def main():
     _, timelog = parse_timelog('times.out')
     timelog_start = timelog[0][2]
     timelog_end = timelog[-1][2]
-    ram_data = parse_sar_ram('r.txt')
-    cpu_data = parse_sar_cpu('u.txt')
+    ram_data = parse_sar_ram('ram.txt.gz')
+    cpu_data = parse_sar_cpu('cpu.txt.gz')
     sar_start = get_sar_start_time(cpu_data, timelog)
     secdata = make_timediff(cpu_data)
+
+    print >>sys.stderr, 'started sar at', sar_start
+    print >>sys.stderr, 'sampling rate:', secdata, 'seconds'
 
     ram_data = fixtime(ram_data, sar_start, secdata)
     cpu_data = fixtime(cpu_data, sar_start, secdata)
 
-    if 0:
-        for x in cpu_data:
-            if x.time < timelog_start:
-                continue
-            if x.time > timelog_end:
-                break
+    fp = open('log.out', 'w')
+    for x, y in zip(cpu_data, ram_data):
+        assert x.time == y.time
+        if x.time < timelog_start:
+            continue
+        if x.time > timelog_end:
+            break
 
-            print make_time(x.time, timelog_start), x.puser
-    else:
-        for x in ram_data:
-            if x.time < timelog_start:
-                continue
-            if x.time > timelog_end:
-                break
-
-            print make_time(x.time, timelog_start), x.kbmemused
+        print >>fp, make_time(x.time, timelog_start), x.puser, y.kbmemused
 
     for script, what, when in timelog:
         if what == 'DONE':
