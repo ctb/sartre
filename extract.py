@@ -2,6 +2,7 @@
 import datetime
 from collections import namedtuple
 import time
+import sys
 
 def parse_timelog(filename):
     d = {}
@@ -109,24 +110,34 @@ def main():
     _, timelog = parse_timelog('times.out')
     timelog_start = timelog[0][2]
     timelog_end = timelog[-1][2]
-    #print parse_sar_ram('r.txt')
+    ram_data = parse_sar_ram('r.txt')
     cpu_data = parse_sar_cpu('u.txt')
     sar_start = get_sar_start_time(cpu_data, timelog)
     secdata = make_timediff(cpu_data)
 
+    ram_data = fixtime(ram_data, sar_start, secdata)
     cpu_data = fixtime(cpu_data, sar_start, secdata)
 
-    for x in cpu_data:
-        if x.time < timelog_start:
-            continue
-        if x.time > timelog_end:
-            break
-    
-        print make_time(x.time, timelog_start), x.puser
+    if 0:
+        for x in cpu_data:
+            if x.time < timelog_start:
+                continue
+            if x.time > timelog_end:
+                break
+
+            print make_time(x.time, timelog_start), x.puser
+    else:
+        for x in ram_data:
+            if x.time < timelog_start:
+                continue
+            if x.time > timelog_end:
+                break
+
+            print make_time(x.time, timelog_start), x.kbmemused
 
     for script, what, when in timelog:
         if what == 'DONE':
-            print script, make_time(when, timelog_start)
+            print >>sys.stderr, script, make_time(when, timelog_start)
 
 if __name__ == '__main__':
     main()
