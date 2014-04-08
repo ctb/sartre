@@ -62,6 +62,32 @@ def parse_sar_ram(filename):
 
     return parsed
 
+def parse_sar_disk(filename, device):
+    parsed = []
+
+    # 06:21:38 PM       DEV       tps  rd_sec/s  wr_sec/s  avgrq-sz  avgqu-sz     await     svctm     %util
+    typ = namedtuple('DeviceStats', 'time dev tps reads writes avgrqsz avgqusz await svctm putil')
+    
+    for n, line in enumerate(gzip.open(filename)):
+        if n < 3:
+            continue
+        if line.startswith('Average'):
+            continue
+
+        line = line.strip().split()
+
+        if line[2] != device:
+            continue
+        
+        assert len(line) == 11, len(line)
+        line2 = [line[0] + ' ' + line[1], line[2]]
+        line2.extend(( float(x) for x in line[3:]))
+
+        t = typ(*line2)
+        parsed.append(t)
+
+    return parsed
+
 def parse_sartime(t):
     t = t.split(' ')[0]
     hour, minute, second = t.split(':')
@@ -118,6 +144,9 @@ def main():
     timelog_end = timelog[-1][2]
     ram_data = parse_sar_ram('ram.txt.gz')
     cpu_data = parse_sar_cpu('cpu.txt.gz')
+    disk_data = parse_sar_disk('disk.txt.gz', 'xvdb')
+    print disk_data[:5]
+    
     sar_start = get_sar_start_time(cpu_data, timelog)
     secdata = make_timediff(cpu_data)
 
@@ -126,16 +155,18 @@ def main():
 
     ram_data = fixtime(ram_data, sar_start, secdata)
     cpu_data = fixtime(cpu_data, sar_start, secdata)
+    disk_data = fixtime(disk_data, sar_start, secdata)
 
     fp = open('log.out', 'w')
-    for x, y in zip(cpu_data, ram_data):
+    for x, y, z in zip(cpu_data, ram_data, disk_data):
         assert x.time == y.time
         if x.time < timelog_start:
             continue
         if x.time > timelog_end:
             break
 
-        print >>fp, make_time(x.time, timelog_start), x.puser, y.kbmemused
+        print >>fp, make_time(x.time, timelog_start), x.puser, y.kbmemused, \
+              z.tps
 
     for script, what, when in timelog:
         if what == 'DONE':
