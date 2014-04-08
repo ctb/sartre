@@ -166,7 +166,7 @@ def main():
             break
 
         print >>fp, make_time(x.time, timelog_start), x.puser, y.kbmemused, \
-              z.tps
+              z.tps, z.reads, z.writes, z.await, z.putil
 
     for script, what, when in timelog:
         if what == 'DONE':
