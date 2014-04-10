@@ -1,0 +1,16 @@
+1-quality INSTALL Wed Apr 9 05:13:33 UTC 2014
+1-quality TRIM Wed Apr 9 05:14:35 UTC 2014
+1-quality FILTER Wed Apr 9 09:37:44 UTC 2014
+1-quality EXTRACT Wed Apr 9 13:30:03 UTC 2014
+1-quality DONE Wed Apr 9 15:28:41 UTC 2014
+2-diginorm normalize1-pe Wed Apr 9 17:00:58 UTC 2014
+2-diginorm normalize1-se Wed Apr 9 20:44:23 UTC 2014
+2-diginorm filter-abund Wed Apr 9 20:57:23 UTC 2014
+2-diginorm extract Wed Apr 9 21:23:23 UTC 2014
+2-diginorm DONE Wed Apr 9 21:36:58 UTC 2014
+3-big-assembly compileTrinity Wed Apr 9 21:37:00 UTC 2014
+3-big-assembly installBowtie Wed Apr 9 21:39:29 UTC 2014
+3-big-assembly installSamtools Wed Apr 9 21:39:31 UTC 2014
+3-big-assembly extractReads Wed Apr 9 21:39:55 UTC 2014
+3-big-assembly assemble Wed Apr 9 21:46:31 UTC 2014
+3-big-assembly DONE Thu Apr 10 16:04:51 UTC 2014
