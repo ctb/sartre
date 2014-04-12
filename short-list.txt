@@ -1,0 +1,2 @@
+short-m1.xlarge
+short-m3.xlarge

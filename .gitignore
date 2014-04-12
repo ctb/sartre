@@ -1,2 +1,4 @@
 *~
 *.pyc
+log.out
+.ipynb_checkpoints

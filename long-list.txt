@@ -1,0 +1,5 @@
+m1.xlarge-data720iops
+m1.xlarge-data720iops-work4000iops
+m1.xlarge-normal
+m2.xlarge
+rackspace-15gb-200GB+100GB-data
