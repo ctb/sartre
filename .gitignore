@@ -2,3 +2,4 @@
 *.pyc
 log.out
 .ipynb_checkpoints
+numa/hpc.txt
