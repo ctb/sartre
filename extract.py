@@ -172,7 +172,7 @@ def main():
         if what == 'DONE':
             print >>sys.stderr, script, make_time(when, timelog_start)
 
-    print 'duration:', timelog_end - timelog_start
+    print 'duration:', make_time(timelog_end) - make_time(timelog_start)
 
 if __name__ == '__main__':
     main()
